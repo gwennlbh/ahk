@@ -67,6 +67,10 @@ LoadCredentials() {
         creds[key] := Trim(parts[2])
     }
 
+    ToolTip "Spotify credentials loaded"
+    Sleep 2000
+    ToolTip
+
     return creds
 }
 
