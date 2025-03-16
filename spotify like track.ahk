@@ -1,5 +1,7 @@
 ﻿#SingleInstance Force
 #Include %A_ScriptDir%\_JXON.ahk  ; JSON parser
+#Include %A_ScriptDir%\HTTP.ahk ; HTTP Requests
+#Include %A_ScriptDir%\backup_likes.ahk ; Likes backup every day at most, on a like 
 
 global spotify_access_token := ""
 global credentials := LoadCredentials()
@@ -51,6 +53,10 @@ LikeCurrentTrack(retrying := "no") {
     ToolTip "❤️ " track["item"]["name"] " by " JoinArtists(track["item"]["artists"])
     Sleep 2000
     ToolTip
+
+    if (WasLibraryUpdatedYesterday() == 1) {
+         BackupLikes()
+    }
 }
 
 JoinArtists(array, separator := ", ") {
@@ -80,10 +86,6 @@ LoadCredentials() {
 	key := Trim(parts[1])
         creds[key] := Trim(parts[2])
     }
-
-    ToolTip "Spotify credentials loaded"
-    Sleep 2000
-    ToolTip
 
     return creds
 }
@@ -118,27 +120,3 @@ RefreshAccessToken() {
     ExitApp
 }
 
-HttpGet(url, token) {
-    http := ComObject("WinHttp.WinHttpRequest.5.1")
-    http.Open("GET", url, false)
-    http.SetRequestHeader("Authorization", "Bearer " . token)
-    http.Send()
-    return http.ResponseText
-}
-
-HttpPut(url, token) {
-    http := ComObject("WinHttp.WinHttpRequest.5.1")
-    http.Open("PUT", url, false)
-    http.SetRequestHeader("Authorization", "Bearer " . token)
-    http.SetRequestHeader("Content-Length", "0")
-    http.Send()
-    return http.Status
-}
-
-HttpPost(url, postData, contentType := "application/x-www-form-urlencoded") {
-    http := ComObject("WinHttp.WinHttpRequest.5.1")
-    http.Open("POST", url, false)
-    http.SetRequestHeader("Content-Type", contentType)
-    http.Send(postData)
-    return http.ResponseText
-}
