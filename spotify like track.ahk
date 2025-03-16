@@ -6,10 +6,10 @@ global credentials := LoadCredentials()
 
 Media_Stop::LikeCurrentTrack()
 
-LikeCurrentTrack() {
+LikeCurrentTrack(retrying := "no") {
     global spotify_access_token
 
-    if (spotify_access_token = "") {
+    if (spotify_access_token = "" || retrying = "yes") {
         spotify_access_token := RefreshAccessToken()
     }
 
@@ -23,15 +23,18 @@ LikeCurrentTrack() {
     }
 
     ; Debugging: Show the response to understand its structure
-    ; MsgBox % "Response: " response
+    ; MsgBox "Response: " response
 
     track := Jxon_Load(&response)
     
     ; Debugging: Output the track structure
-    ; MsgBox % "Track Object: " track
 
     if !track.Has("item") {
-        MsgBox "No 'item' property found in the response. Response: " response
+	if (retrying = "yes") {
+	        MsgBox "No 'item' property found in the response. Response: " response
+	} else {
+		LikeCurrentTrack("yes")
+	}
         return
     }
 
@@ -45,9 +48,20 @@ LikeCurrentTrack() {
     likeUrl := "https://api.spotify.com/v1/me/tracks?ids=" . trackID
     HttpPut(likeUrl, spotify_access_token)
 
-    ToolTip "Track Liked! ❤️"
+    ToolTip "❤️ " track["item"]["name"] " by " JoinArtists(track["item"]["artists"])
     Sleep 2000
     ToolTip
+}
+
+JoinArtists(array, separator := ", ") {
+    output := ""
+    Loop array.length
+	if (A_Index > 1) {
+		output := output separator array[A_Index]["name"]
+	} else {
+		output := output array[A_Index]["name"]
+	}
+    return output
 }
 
 LoadCredentials() {
@@ -75,7 +89,7 @@ LoadCredentials() {
 }
 
 RefreshAccessToken() {
-    global credentials
+    global credentials := LoadCredentials()
 
     if !(credentials.Has("client_id") && credentials.Has("client_secret") && credentials.Has("refresh_token")) {
         MsgBox "Missing credentials in spotify_credentials.txt"
