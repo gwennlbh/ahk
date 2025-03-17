@@ -4,6 +4,7 @@
 BackupLikes() {
 	ToolTip "Backing up tracks to github"
 	; Last update to library.tsv was not today, run the backup
+	; See https://github.com/gwennlbh/music-library/tree/main/backup.py
 	Run "uv run backup.py", "E:\music", "Hide" 
 	ToolTip "Backed up tracks to github"
 	Sleep 200
@@ -13,9 +14,9 @@ BackupLikes() {
 WasLibraryUpdatedYesterday() {
 	response := HttpGet("https://api.github.com/repos/gwennlbh/music-library/commits?path=library.tsv&page=1&per_page=1")
 	data := Jxon_Load(&response)
-	datetimestring := data[0]["commit"]["committer"]["date"]
+	datetimestring := data[1]["commit"]["committer"]["date"]
 	dateparts := StrSplit(datetimestring, "T")
-	datepart := dateparts[0]
+	datepart := dateparts[1]
 
 	if (StrCompare(GetToday(), datepart) != 0) {
 		return 1
