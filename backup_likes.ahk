@@ -1,11 +1,11 @@
 #Include %A_ScriptDir%\HTTP.ahk ; HTTP Requests
-#Include %A_ScriptDir%\_JXON.ahk ; JSON parsing 
+#Include %A_ScriptDir%\_JXON.ahk ; JSON parsing
 
 BackupLikes() {
 	ToolTip "Backing up tracks to github"
 	; Last update to library.tsv was not today, run the backup
 	; See https://github.com/gwennlbh/music-library/tree/main/backup.py
-	Run "uv run backup.py", "E:\music", "Hide" 
+	Run "uv run backup.py", "E:\music", "Hide"
 	ToolTip "Backed up tracks to github"
 	Sleep 200
 	ToolTip

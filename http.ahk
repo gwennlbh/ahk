@@ -2,7 +2,7 @@ HttpGet(url, token := "") {
     http := ComObject("WinHttp.WinHttpRequest.5.1")
     http.Open("GET", url, false)
     if (token != "") {
-    	http.SetRequestHeader("Authorization", "Bearer " . token)
+        http.SetRequestHeader("Authorization", "Bearer " . token)
     }
     http.Send()
     return http.ResponseText
@@ -24,4 +24,3 @@ HttpPost(url, postData, contentType := "application/x-www-form-urlencoded") {
     http.Send(postData)
     return http.ResponseText
 }
-

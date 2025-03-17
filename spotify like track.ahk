@@ -1,12 +1,12 @@
 ﻿#SingleInstance Force
 #Include %A_ScriptDir%\_JXON.ahk  ; JSON parser
 #Include %A_ScriptDir%\HTTP.ahk ; HTTP Requests
-#Include %A_ScriptDir%\backup_likes.ahk ; Likes backup every day at most, on a like 
+#Include %A_ScriptDir%\backup_likes.ahk ; Likes backup every day at most, on a like
 
 global spotify_access_token := ""
 global credentials := LoadCredentials()
 
-Media_Stop::LikeCurrentTrack()
+Media_Stop:: LikeCurrentTrack()
 
 LikeCurrentTrack(retrying := "no") {
     global spotify_access_token
@@ -28,15 +28,15 @@ LikeCurrentTrack(retrying := "no") {
     ; MsgBox "Response: " response
 
     track := Jxon_Load(&response)
-    
+
     ; Debugging: Output the track structure
 
     if !track.Has("item") {
-	if (retrying = "yes") {
-	        MsgBox "No 'item' property found in the response. Response: " response
-	} else {
-		LikeCurrentTrack("yes")
-	}
+        if (retrying = "yes") {
+            MsgBox "No 'item' property found in the response. Response: " response
+        } else {
+            LikeCurrentTrack("yes")
+        }
         return
     }
 
@@ -55,18 +55,18 @@ LikeCurrentTrack(retrying := "no") {
     ToolTip
 
     if (WasLibraryUpdatedYesterday() == 1) {
-         BackupLikes()
+        BackupLikes()
     }
 }
 
 JoinArtists(array, separator := ", ") {
     output := ""
     Loop array.length
-	if (A_Index > 1) {
-		output := output separator array[A_Index]["name"]
-	} else {
-		output := output array[A_Index]["name"]
-	}
+        if (A_Index > 1) {
+            output := output separator array[A_Index]["name"]
+        } else {
+            output := output array[A_Index]["name"]
+        }
     return output
 }
 
@@ -83,7 +83,7 @@ LoadCredentials() {
         if (line = "" || !InStr(line, "="))
             continue
         parts := StrSplit(line, "=")
-	key := Trim(parts[1])
+        key := Trim(parts[1])
         creds[key] := Trim(parts[2])
     }
 
@@ -99,9 +99,9 @@ RefreshAccessToken() {
     }
 
     url := "https://accounts.spotify.com/api/token"
-    postData := "grant_type=refresh_token&refresh_token=" . credentials["refresh_token"] 
-                . "&client_id=" . credentials["client_id"] 
-                . "&client_secret=" . credentials["client_secret"]
+    postData := "grant_type=refresh_token&refresh_token=" . credentials["refresh_token"]
+        . "&client_id=" . credentials["client_id"]
+        . "&client_secret=" . credentials["client_secret"]
 
     response := HttpPost(url, postData, "application/x-www-form-urlencoded")
 
@@ -117,32 +117,31 @@ RefreshAccessToken() {
     }
 
     if (json.Has("refresh_token") && FileExist(A_ScriptDir "\spotify_credentials.txt")) {
-    	    wrotenew := false
-	    credsfile := FileOpen(A_ScriptDir "\spotify_credentials.txt", "rw")
-	    while !credsfile.AtEOF {
-	    	line := credsfile.ReadLine()
-		if (line = "" || !InStr(line, "=")) {
-		    credsfile.WriteLine(line)
-		    continue
-	        }
-		parts := StrSplit(line, "=")
-		key := Trim(parts[1])
-		if (key = "refresh_token") {
-			credsfile.WriteLine("refresh_token=" json["refresh_token"])
-			wrotenew := true
-		} else {
-			credsfile.WriteLine(line)
-		}
-	    }
-	    credsfile.Close()
-	    if wrotenew {
-	    	ToolTip "Wrote new refresh token"
-		Sleep 200
-		ToolTip 
-	    }
+        wrotenew := false
+        credsfile := FileOpen(A_ScriptDir "\spotify_credentials.txt", "rw")
+        while !credsfile.AtEOF {
+            line := credsfile.ReadLine()
+            if (line = "" || !InStr(line, "=")) {
+                credsfile.WriteLine(line)
+                continue
+            }
+            parts := StrSplit(line, "=")
+            key := Trim(parts[1])
+            if (key = "refresh_token") {
+                credsfile.WriteLine("refresh_token=" json["refresh_token"])
+                wrotenew := true
+            } else {
+                credsfile.WriteLine(line)
+            }
+        }
+        credsfile.Close()
+        if wrotenew {
+            ToolTip "Wrote new refresh token"
+            Sleep 200
+            ToolTip
+        }
     }
 
     MsgBox "Failed to retrieve new access token!"
     ExitApp
 }
-
