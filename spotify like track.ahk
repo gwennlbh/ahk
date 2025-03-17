@@ -116,6 +116,32 @@ RefreshAccessToken() {
         return newToken
     }
 
+    if (json.Has("refresh_token") && FileExist(A_ScriptDir "\spotify_credentials.txt")) {
+    	    wrotenew := false
+	    credsfile := FileOpen(A_ScriptDir "\spotify_credentials.txt", "rw")
+	    while !credsfile.AtEOF {
+	    	line := credsfile.ReadLine()
+		if (line = "" || !InStr(line, "=")) {
+		    credsfile.WriteLine(line)
+		    continue
+	        }
+		parts := StrSplit(line, "=")
+		key := Trim(parts[1])
+		if (key = "refresh_token") {
+			credsfile.WriteLine("refresh_token=" json["refresh_token"])
+			wrotenew := true
+		} else {
+			credsfile.WriteLine(line)
+		}
+	    }
+	    credsfile.Close()
+	    if wrotenew {
+	    	ToolTip "Wrote new refresh token"
+		Sleep 200
+		ToolTip 
+	    }
+    }
+
     MsgBox "Failed to retrieve new access token!"
     ExitApp
 }
